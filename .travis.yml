@@ -1,0 +1,13 @@
+sudo: false
+cache: apt
+language: python
+python:
+  - "3.5"
+  - "3.6"
+  - "3.7-dev"
+
+virtualenv:
+  system_site_packages: false
+
+script:
+  - ./setup.py test
