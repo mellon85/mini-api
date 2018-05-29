@@ -139,3 +139,24 @@ class Server:
             bisect.insort(self._paths, (path, method))
             return method
         return register
+
+    def add_prometheus(self, path='/metrics'):
+        """Register prometheus metrics route."""
+        # TODO docs
+        from prometheus_client import generate_latest
+
+        @self.route(path)
+        def _prometheus_route(*args):
+            return HTTPStatus.OK, generate_latest()
+
+    def add_multiprocess_prometheus(self, path='/metrics'):
+        """Register prometheus multiprocessing route."""
+        # TODO docs
+        from prometheus_client import multiprocess
+        from prometheus_client import generate_latest, CollectorRegistry
+
+        @self.route(path)
+        def _prometheus_multiproc_route(*args):
+                registry = CollectorRegistry()
+                multiprocess.MultiProcessCollector(registry)
+                return HTTPStatus.OK, bytes(generate_latest(registry))

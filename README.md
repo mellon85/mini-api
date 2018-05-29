@@ -11,6 +11,7 @@ Features
 
 - Minimal codebase
 - Each GET call automatically responds to HEAD too
+- Added prometheus easy integration
 
 ```python
 import mini_api
