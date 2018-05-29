@@ -43,8 +43,9 @@ class Handler(BaseHTTPRequestHandler):
 
         self.send_response(status)
 
-        if message and not isinstance(message, bytes):
-            message = message.encode('utf-8')
+        if message:
+            if not isinstance(message, bytes):
+                message = message.encode('utf-8')
             self.send_header('Content-Length', len(message))
         else:
             self.send_header('Content-Length', 0)
