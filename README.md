@@ -7,6 +7,11 @@ simple APIs over HTTP without any additional dependency that this module.
 
 It spawns a thread to process incoming requests.
 
+Features
+
+- Minimal codebase
+- Each GET call automatically responds to HEAD too
+
 ```python
 import mini_api
 

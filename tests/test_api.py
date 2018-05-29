@@ -41,11 +41,15 @@ class TestAPI(unittest.TestCase):
             return 202, 'aa'
 
         self.server.start()
-        self.conn = HTTPConnection('localhost', self.server.address[1])
-        self.conn.request('GET', 'aaa')
-        response = self.conn.getresponse()
-        self.assertEqual(response.status, 202)
-        self.assertEqual(response.readlines(), [b'aa'])
+        for verb in ('GET', 'HEAD'):
+            with self.subTest(verb=verb):
+                self.conn = HTTPConnection('localhost', self.server.address[1])
+                self.conn.request(verb, 'aaa')
+                response = self.conn.getresponse()
+                self.assertEqual(response.status, 202)
+                if verb == 'GET':
+                    self.assertEqual(response.readlines(), [b'aa'])
+                self.conn.close()
 
     def test_single_route_params(self):
         @self.server.route('aaa')
@@ -141,11 +145,15 @@ class TestAPI(unittest.TestCase):
             raise Exception('error')
 
         self.server.start()
-        self.conn = HTTPConnection('localhost', self.server.address[1])
-        self.conn.request('GET', 'aaa/bbb/ccc')
-        response = self.conn.getresponse()
-        self.assertEqual(response.status, 500)
-        self.assertEqual(response.readlines(), [])
+
+        for verb in ('GET', 'HEAD'):
+            with self.subTest(verb=verb):
+                self.conn = HTTPConnection('localhost', self.server.address[1])
+                self.conn.request(verb, 'aaa/bbb/ccc')
+                response = self.conn.getresponse()
+                self.assertEqual(response.status, 500)
+                self.assertEqual(response.readlines(), [])
+                self.conn.close()
 
     def test_utf_data(self):
         @self.server.route('aaa')
@@ -153,19 +161,27 @@ class TestAPI(unittest.TestCase):
             return 300, "ÂÂ"
 
         self.server.start()
-        self.conn = HTTPConnection('localhost', self.server.address[1])
-   
-        self.conn.request('GET', 'aaa/bbb/ccc')
-        response = self.conn.getresponse()
-        self.assertEqual(response.status, 300)
-        self.assertEqual(response.readlines(), [b'\xc3\x82\xc2\x89\xc3\x82'])
+
+        for verb in ('GET', 'HEAD'):
+            with self.subTest(verb=verb):
+                self.conn = HTTPConnection('localhost', self.server.address[1])
+                self.conn.request(verb, 'aaa/bbb/ccc')
+                response = self.conn.getresponse()
+                self.assertEqual(response.status, 300)
+                if verb == 'GET':
+                    self.assertEqual(response.readlines(),
+                                     [b'\xc3\x82\xc2\x89\xc3\x82'])
+                self.conn.close()
 
     def test_404(self):
         """ Query non existing route """
         self.server.start()
-        self.conn = HTTPConnection('localhost', self.server.address[1])
-   
-        self.conn.request('GET', 'aaa/bbb/ccc')
-        response = self.conn.getresponse()
-        self.assertEqual(response.status, 404)
-        self.assertEqual(response.readlines(), [])
+
+        for verb in ('GET', 'HEAD'):
+            with self.subTest(verb=verb):
+                self.conn = HTTPConnection('localhost', self.server.address[1])
+                self.conn.request(verb, 'aaa/bbb/ccc')
+                response = self.conn.getresponse()
+                self.assertEqual(response.status, 404)
+                self.assertEqual(response.readlines(), [])
+                self.conn.close()

@@ -16,7 +16,13 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):
         logger.info(fmt, *args)
 
-    def do_GET(self):
+    def do_HEAD(self) -> None:
+        self._process(data=False)
+
+    def do_GET(self) -> None:
+        self._process(data=True)
+
+    def _process(self, data) -> int:
         self.protocol_version = 'HTTP/1.1'
         try:
             for path, method in self._paths:
@@ -35,17 +41,19 @@ class Handler(BaseHTTPRequestHandler):
             status, message = HTTPStatus.INTERNAL_SERVER_ERROR, None
             logger.exception('Failed serving %s', self.path)
 
+        self.send_response(status)
+
         if message and not isinstance(message, bytes):
             message = message.encode('utf-8')
-        self.send_response(status)
-        if message:
             self.send_header('Content-Length', len(message))
         else:
             self.send_header('Content-Length', 0)
 
         self.end_headers()
-        if message:
+
+        if message and data:
             self.wfile.write(message)
+        return status
 
 
 class Server:
